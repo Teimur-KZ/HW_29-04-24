@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}
+{{ product.title }} - Интернет-магазин
+{% endblock %}
+{% block content %}
+<table class="table table-striped">
+    <tr>
+        <td>Название товара: {{ product.name }}</td>
+        <td rowspan="6"><img src="{{ product.image.url }}" alt="Изображение товара" width="250" height="250"></td>
+    </tr>
+    <tr>
+        <td>Описание товара: {{ product.description | safe }}</td>
+    </tr>
+    <tr>
+        <td>Бренд: {{ product.brand }}</td>
+    </tr>
+    <tr>
+        <td>
+            <form id="productForm" method="post" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <select id="sizeSelect" name="size">
+                    {% for size_quantity in productSizeQuantity %}
+                    <option value="{{ size_quantity.size.id }}">{{ size_quantity.size.size }}</option>
+                    {% endfor %}
+                </select>
+                <div id="stockStatus"></div>
+                <input type="submit" id="addToCartButton" value="Добавить в корзину"
+                       {% if not productSizeQuantity %}disabled{% endif %}>
+            </form>
+
+            <script>
+                document.getElementById('sizeSelect').addEventListener('change', function() {
+                    var selectedSizeId = this.value;
+                    {% for size_quantity in productSizeQuantity %}
+                        if ({{ size_quantity.size.id }} == selectedSizeId) {
+                            var quantity = {{ size_quantity.quantity }};
+                            var stockStatusDiv = document.getElementById('stockStatus');
+                            var addToCartButton = document.getElementById('addToCartButton');
+                            if (quantity > 5) {
+                                stockStatusDiv.textContent = 'Остаток в наличии';
+                                addToCartButton.disabled = false;
+                            } else if (quantity > 0) {
+                                stockStatusDiv.textContent = 'Осталось мало';
+                                addToCartButton.disabled = false;
+                            } else {
+                                stockStatusDiv.textContent = 'Нет в наличии';
+                                addToCartButton.disabled = true;
+
+                            }
+
+                        }
+                    {% endfor %}
+                });
+                document.getElementById('sizeSelect').dispatchEvent(new Event('change'));
+            </script>
+
+        </td>
+    </tr>
+    <tr>
+        <td>Цена товара: {{ product.price }}</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'product_category' category %}">Вернуться к списку товаров</a></td>
+    </tr>
+</table>
+
+
+{% endblock %}

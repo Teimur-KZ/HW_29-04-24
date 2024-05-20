@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}
+Корзина - Интернет-магазин
+{% endblock %}
+{% block content %}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Название товара</th>
+        <th>Количество</th>
+        <th>Цена</th>
+        <th>Общая стоимость</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for cart_product in cart.cartproduct_set.all %}
+    <tr>
+        <td>{{ cart_product.product.name }} | {{ cart_product.size.size }}</td>
+        <td>
+            <form method="post" action="{% url 'change_quantity' cart_product.product.id cart_product.quantity %}">
+                {% csrf_token %}
+                <input type="number" name="quantity" value="{{ request.POST.quantity|default:cart_product.quantity }}" min="1">
+
+                <input type="submit" value="Изменить количество">
+            </form>
+
+        </td>
+        <td>{{ cart_product.product.price }}</td>
+        <td>{{ cart_product.get_total }}</td>
+        <td>
+            <form method="post" action="{% url 'remove_from_cart' cart_product.product.id %}">
+                {% csrf_token %}
+                <input type="submit" value="Удалить">
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+</table>
+<a href="">Оформить заказ</a> (заглушка)
+{% endblock %}
+
+
+<!-- {% url 'order_view' %} -->
