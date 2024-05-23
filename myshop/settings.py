@@ -21,12 +21,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^p%e8p+gjj47pw1v@gw)-*x_6m*o5^5(+hdsw+xflb)y+p#6ox'
+# SECRET_KEY = 'django-insecure-^p%e8p+gjj47pw1v@gw)-*x_6m*o5^5(+hdsw+xflb)y+p#6ox' # секретный ключ который используется для шифрования данных во время сессии
+# при разработке проекта можно использовать стандартный ключ, но в продакшене его нужно изменить:
+SECRET_KEY = os.getenv('SECRET_KEY') # секретный ключ который используется для шифрования данных во время сессии
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True # режим отладки во время разработки
+DEBUG = False
+# *** добавить настройки для безопасности в продакшене:
+SESSION_COOKIE_SECURE = True # защита сессий
+CSRF_COOKIE_SECURE = True # защита от CSRF-атак
+# ***
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1'] # список хостов, которые могут обращаться к проекту
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'Teimur.pythonanywhere.com',
+] # список хостов, которые могут обращаться к проекту
 
 
 # Application definition
@@ -85,8 +96,17 @@ WSGI_APPLICATION = 'myshop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        #'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        #'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': 'Teimur$default', # имя базы данных
+        'USER': 'Teimur', # имя пользователя от базы данных
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'), # пароль от базы данных через переменную окружения (!!!)
+        'HOST': 'Teimur.mysql.pythonanywhere-services.com',# !!!
+        'OPTIONS': {
+            'init_command': "SET NAMES 'utf8mb4'; SET sql_mode='STRICT_TRANS_TABLES';", # кодировка utf8mb4, строгий режим транзакций (!!!)
+            'charset': 'utf8mb4', # кодировка utf8mb4 (!!!)
+        },
     }
 }
 
@@ -126,10 +146,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static') # путь к папке со статическими файлами (!!!)
+STATIC_ROOT = BASE_DIR / 'static' # путь к папке со статическими файлами
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static') # путь к папке со статическими файлами (!!!)
 
 MEDIA_URL = '/media/' # путь к медиафайлам (!!!)
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # путь к папке с медиафайлами (!!!)
+MEDIA_ROOT = BASE_DIR / 'media' # путь к папке с медиафайлами
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # путь к папке с медиафайлами (!!!)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
